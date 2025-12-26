@@ -14,8 +14,8 @@ app = Flask(__name__)
 API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=API_KEY)
 
-# MODEL_ID = "gemini-2.5-flash"
-MODEL_ID = "gemini-flash-latest"
+MODEL_ID = "gemini-2.5-flash"
+# MODEL_ID = "gemini-flash-latest"
 
 # HTML kodas kaip kintamasis (kad nereikėtų atskiro failo testuojant)
 HTML_TEMPLATE = """
