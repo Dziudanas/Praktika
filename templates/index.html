@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>VILNIUS TECH Robotas</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; display: flex; justify-content: center; padding: 20px; }
+        .container { width: 600px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: #FF5A00; color: white; padding: 20px; text-align: center; font-weight: bold; }
+        #chat-window { height: 400px; overflow-y: auto; padding: 20px; border-bottom: 1px solid #eee; }
+        .message { margin-bottom: 15px; padding: 10px; border-radius: 10px; max-width: 80%; }
+        .user { background: #e1f5fe; align-self: flex-end; margin-left: auto; }
+        .robot { background: #f1f1f1; }
+        .status-panel { background: #333; color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; }
+        .input-area { display: flex; padding: 20px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #FF5A00; color: white; border: none; padding: 10px 20px; margin-left: 10px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">VILNIUS TECH HUMANOIDAS</div>
+    <div id="chat-window"></div>
+    <div class="status-panel" id="status">SISTEMA: Paruošta darbui</div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Klausk ko nors apie studijas...">
+        <button onclick="sendMessage()">Klausti</button>
+    </div>
+</div>
+
+<script>
+    async function sendMessage() {
+        const input = document.getElementById('userInput');
+        const chat = document.getElementById('chat-window');
+        const status = document.getElementById('status');
+        const message = input.value;
+        if (!message) return;
+
+        // Pridedam vartotojo tekstą
+        chat.innerHTML += `<div class="message user"><b>Moksleivis:</b> ${message}</div>`;
+        input.value = '';
+        status.innerText = "SISTEMA: Gemini mąsto...";
+
+        const response = await fetch('/ask', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: message})
+        });
+        const data = await response.json();
+
+        // Pridedam roboto tekstą
+        chat.innerHTML += `<div class="message robot"><b>Robotas:</b> ${data.tekstas}</div>`;
+        
+        // Atnaujinam statusą (komandą)
+        status.innerText = `SISTEMA: Komanda: ${data.komanda.toUpperCase()} | Lokacija: ${data.lokacija || 'Nėra'}`;
+        chat.scrollTop = chat.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
