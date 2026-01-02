@@ -3,15 +3,16 @@ import json
 from flask import Flask, request, jsonify, render_template_string
 from google import genai
 from google.genai import types
-from dotenv import load_dotenv  # Pridėta ši eilutė
-
-# Užkrauname kintamuosius iš .env failo
-load_dotenv()
 
 app = Flask(__name__)
 
-# API raktą paimame saugiai
+# os.getenv automatiškai paims reikšmę iš Render "Environment Variables"
 API_KEY = os.getenv("GEMINI_API_KEY")
+
+# Rekomenduojama: patikra, ar raktas tikrai pasiekiamas (pamatysi loguose, jei bus klaida)
+if not API_KEY:
+    print("KLAIDA: API raktas nerastas. Patikrinkite Render Environment Variables!")
+
 client = genai.Client(api_key=API_KEY)
 
 MODEL_ID = "gemini-2.5-flash"
