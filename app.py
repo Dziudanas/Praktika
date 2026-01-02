@@ -3,20 +3,24 @@ import json
 from flask import Flask, request, jsonify, render_template_string
 from google import genai
 from google.genai import types
+from dotenv import load_dotenv
+
+# Lokaliai užkrauna .env, Render platformoje naudoja sistemos kintamuosius
+load_dotenv()
 
 app = Flask(__name__)
 
-# os.getenv automatiškai paims reikšmę iš Render "Environment Variables"
+# API raktą paimame iš Render Environment Variables
 API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Rekomenduojama: patikra, ar raktas tikrai pasiekiamas (pamatysi loguose, jei bus klaida)
+# Patikra: Jei raktas nerastas, serveris apie tai praneš loguose
 if not API_KEY:
-    print("KLAIDA: API raktas nerastas. Patikrinkite Render Environment Variables!")
+    print("KLAIDA: GEMINI_API_KEY aplinkos kintamasis nerastas!")
 
 client = genai.Client(api_key=API_KEY)
 
+# Jūsų naudojamas modelis
 MODEL_ID = "gemini-2.5-flash"
-# MODEL_ID = "gemini-flash-latest"
 
 # HTML kodas kaip kintamasis (kad nereikėtų atskiro failo testuojant)
 HTML_TEMPLATE = """
@@ -191,7 +195,18 @@ def ask():
         return jsonify(json.loads(response.text))
         
     except Exception as e:
-        return jsonify({"tekstas": "Įvyko klaida susisiekiant su AI serveriu.", "komanda": "nieko", "lokacija": None})
+        # PAKEISTA: Grąžiname tikrąją klaidą vartotojui, kad žinotume, kas vyksta
+        error_msg = str(e)
+        print(f"Išsami klaida: {error_msg}")
+        return jsonify({
+            "tekstas": f"Sistemos klaida: {error_msg}", 
+            "komanda": "nieko", 
+            "lokacija": None
+        })
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # SVARBU RENDER PLATFORMAI:
+    # 1. Host privalo būti 0.0.0.0
+    # 2. Port privalo būti paimamas iš aplinkos (os.environ)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
